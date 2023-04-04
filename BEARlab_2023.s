@@ -23,6 +23,7 @@ loop: mov r0, BT    ;nyomógombok beolvasása
       jz tst_BT1    ;következõ BT tesztelése, ha nincs BT0 lenyomás
       jsr sum       ; a BT0 lenyomása esetén végrehajtandó szubrutin
                     ; végrehajtása
+      jsr display
       jmp main      ;egyszerre csak 1 gomb lenyomását vesszük figyelembe
 
 tst_BT1: tst r0, #0x02
@@ -73,6 +74,7 @@ add4:   sr0 r7
         add r8, r9
 add8:   sr0 r7
         jnc mul_ret
+        mov r9, r6
         sl0 r9
         sl0 r9
         sl0 r9
@@ -146,17 +148,18 @@ disp_norm:
          mov r8, (r8)
          mov DIG1, r8
          
+         mov r9, r7
          and r7, #0x0F
          mov r8, #sgtbl
          add r8, r7
          mov r8, (r8)
          mov DIG2, r8
          
-         and r7, #0xF0
+         and r9, #0xF0
+         mov r7, r9
          swp r7
          mov r8, #sgtbl
          add r8, r7
-         mov r8, r7
          mov r8, (r8)
          mov DIG3, r8
          
