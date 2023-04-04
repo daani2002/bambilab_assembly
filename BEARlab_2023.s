@@ -124,44 +124,49 @@ div_ret:
 error:  mov r6, #0xFF
         rts
 
-display: mov r10, r0    ;r0-ban van a lenyomott gomb értéke
+display: mov r7, SW
+         mov r8, #0x00
+         mov r10, r0    ;r0-ban van a lenyomott gomb értéke
          tst r10, #0x08 ;vizsgálom, hogy osztás volt-e
-         mov r7, SW
          jz  disp_norm
          mov r7, r6
          and r7, #0xF0
          swp r7
          and r6, #0x0F
+         mov r8, #0x04  ;a DIG2 pontja világítson
 disp_norm: 
-         mov r8, #sgtbl
+         mov r10, #sgtbl
          mov r9, r6
          and r9, #0x0F
-         add r8, r9
-         mov r8, (r8)
-         mov DIG0, r8
+         add r10, r9
+         mov r10, (r10)
+         mov DIG0, r10
          
-         mov r8, #sgtbl
+         mov r10, #sgtbl
          mov r9, r6
          and r9, #0xF0
          swp r9
-         add r8, r9
-         mov r8, (r8)
-         mov DIG1, r8
+         add r10, r9
+         mov r10, (r10)
+         mov DIG1, r10
          
          mov r9, r7
          and r7, #0x0F
-         mov r8, #sgtbl
-         add r8, r7
-         mov r8, (r8)
-         mov DIG2, r8
+         mov r10, #sgtbl
+         add r10, r7
+         mov r10, (r10)
+         tst r8, #0x04
+         jz D2_mov
+         add r10, #0x80
+D2_mov:  mov DIG2, r10
          
          and r9, #0xF0
          mov r7, r9
          swp r7
-         mov r8, #sgtbl
-         add r8, r7
-         mov r8, (r8)
-         mov DIG3, r8
+         mov r10, #sgtbl
+         add r10, r7
+         mov r10, (r10)
+         mov DIG3, r10
          
          rts
 
