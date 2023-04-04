@@ -2,13 +2,18 @@ DEF LD 0x80     ;LED-ek címe
 DEF SW 0x81     ;kapcsolók címe
 DEF BT 0x84     ;nyomógomb regiszter
 DEF BTIF 0x86   ;változás figyelõ regiszter
+DEF DIG0 0x90    ;display 0.digit
+DEF DIG1 0x91    ;display 1.digit
+DEF DIG2 0x92    ;display 2.digit
+DEF DIG3 0x93    ;display 3.digit
 
 main: mov r2, SW
       mov r3, r2
       and r3, #0x0F  ;kapcsoló alsó 4 bitje: op2
       and r2, #0xF0  ;kapcsoló felsõ 4 bitje: op1
       swp r2 
-      mov LD, r7
+      ;jsr display    ;hétszegmens kijelzõre író szubrutin
+      ;mov LD, r6
        
 loop: mov r0, BT    ;nyomógombok beolvasása
       mov r1, BTIF  ;megváltozott nyomógombnál a megfelelõ BTIF bit 1-lesz
@@ -23,21 +28,24 @@ loop: mov r0, BT    ;nyomógombok beolvasása
 tst_BT1: tst r0, #0x02
          jz tst_BT2
          jsr substract
+         jsr display
          jmp main
         
 tst_BT2: tst r0, #0x04
          jz tst_BT3
          jsr mul
+         jsr display
          jmp main
 
 tst_BT3: tst r0, #0x08
          jz main
          jsr div
+         jsr display
          jmp main
          
 sum:     mov r7, r3 ;op2
          mov r6, r2 ;op1
-         add r7, r6 ;op1+op2
+         add r6, r7 ;op1+op2
          rts
       
 substract:  mov r7, r3  ;op2
@@ -70,51 +78,91 @@ add8:   sr0 r7
         sl0 r9
         add r8, r9
                 
-mul_ret:mov r7, r8    
+mul_ret:mov r6, r8    
         rts
                 
 div:    mov r11, #0x00
-        mov r7, r2  ;osztandó(maradék)
-        mov r6, r3  ;osztó
-        tst r6, #0xFF
+        mov r6, r2  ;osztandó(maradék)
+        mov r7, r3  ;osztó
+        tst r7, #0xFF
         jz error
-        mov r10, r7
-        mov r8, r6  ;ez lehet nem kell!!
+        mov r10, r6
+        mov r8, r7  ;ez lehet nem kell!!
 harmadik:
         swp r8
         sr0 r8
         sub r10, r8
         jc  masodik
         or r11, #0x08
-        mov r7, r10
+        mov r6, r10
 masodik:sr0 r8
-        mov r10, r7
+        mov r10, r6
         sub r10, r8
         jc elso
         or r11, #0x04
-        mov r7, r10
+        mov r6, r10
 elso:   sr0 r8
-        mov r10, r7
+        mov r10, r6
         sub r10, r8
         jc  nulladik
         or  r11, #0x02
-        mov r7, r10
+        mov r6, r10
 nulladik:sr0 r8
-        mov r10, r7
+        mov r10, r6
         sub r10, r8
         jc  div_ret
         or  r11, #0x01
-        mov r7, r10
+        mov r6, r10
 div_ret:        
-        mov r6, r11
-        swp r6      ;az egészrész a felsõ 4 bitre kerül
-        add r7, r6
+        mov r7, r11
+        swp r7      ;az egészrész a felsõ 4 bitre kerül
+        add r6, r7
         rts
 
-error:  mov r7, #0xFF
+error:  mov r6, #0xFF
         rts
 
-     
+display: mov r10, r0    ;r0-ban van a lenyomott gomb értéke
+         tst r10, #0x08 ;vizsgálom, hogy osztás volt-e
+         mov r7, SW
+         jz  disp_norm
+         mov r7, r6
+         and r7, #0xF0
+         swp r7
+         and r6, #0x0F
+disp_norm: 
+         mov r8, #sgtbl
+         mov r9, r6
+         and r9, #0x0F
+         add r8, r9
+         mov r8, (r8)
+         mov DIG0, r8
+         
+         mov r8, #sgtbl
+         mov r9, r6
+         and r9, #0xF0
+         swp r9
+         add r8, r9
+         mov r8, (r8)
+         mov DIG1, r8
+         
+         and r7, #0x0F
+         mov r8, #sgtbl
+         add r8, r7
+         mov r8, (r8)
+         mov DIG2, r8
+         
+         and r7, #0xF0
+         swp r7
+         mov r8, #sgtbl
+         add r8, r7
+         mov r8, r7
+         mov r8, (r8)
+         mov DIG3, r8
+         
+         rts
+
+
 DATA ; adatszegmens kijelölése
 ; A hétszegmenses dekóder szegmensképei (0-9, A-F) az adatmemóriában.
 sgtbl: DB 0x3f, 0x06, 0x5b, 0x4f, 0x66, 0x6d, 0x7d, 0x07, 0x7f, 0x6f, 0x77, 0x7c, 0x39, 0x5e, 0x79, 0x71         
