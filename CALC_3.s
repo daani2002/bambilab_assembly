@@ -129,7 +129,7 @@ display: mov r7, SW
          mov r10, r0    ;r0-ban van a lenyomott gomb értéke
          tst r10, #0x08 ;vizsgálom, hogy osztás volt-e
          jz  disp_norm
-         mov r8, #0x08  ;a DIG1 pontja világítson
+         mov r8, #0x02  ;a DIG1 pontja világítson
 disp_norm: 
          mov r10, #sgtbl
          mov r9, r6
@@ -144,7 +144,7 @@ disp_norm:
          swp r9
          add r10, r9
          mov r10, (r10)
-         tst r8, #0x08
+         tst r8, #0x02
          jz D1_mov
          add r10, #0x80
 D1_mov:  mov DIG1, r10
