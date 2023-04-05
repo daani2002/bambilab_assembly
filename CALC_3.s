@@ -121,7 +121,7 @@ div_ret:
         add r6, r7
         rts
 
-error:  mov r6, #0xFF
+error:  mov r6, #0xEE
         rts
 
 display: mov r7, SW

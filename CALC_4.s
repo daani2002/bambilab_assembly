@@ -115,7 +115,7 @@ div_ret:
         add r6, r7
         rts
 
-error:  mov r6, #0xFF
+error:  mov r6, #0xEE   ;hibás eredmény esetén az EE jelzést adjuk
         rts
 
 display: mov r10, r0    ;r0-ban van a lenyomott gomb értéke
@@ -123,7 +123,10 @@ display: mov r10, r0    ;r0-ban van a lenyomott gomb értéke
          jz  notdiv     ;ha nem osztás van, DIG1 pontja világít
          mov r8, #0x02  ;a DIG1 pontja világítson  
          jmp withdiv
-notdiv:  jsr bin2bcd
+notdiv:  mov r9, r6
+         sub r9, #0xEE  ;ha hibajelzés volt, nem kell bcd konverzió
+         jz  withdiv
+         jsr bin2bcd
          mov r8, #0x00
 withdiv: mov r7, SW 
          mov r10, #sgtbl
